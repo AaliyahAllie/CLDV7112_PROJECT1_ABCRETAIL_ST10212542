@@ -1,0 +1,125 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="display-6 fw-bold mb-1"><span class="text-gradient">Admin Portal</span></h1>
+        <p class="text-white-50">Operational dashboard monitoring Azure Storage services status.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <!-- Stat 1: Customers -->
+    <div class="col-md-6 col-lg-3">
+        <div class="glass-panel p-4 h-100 d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-white-50 small d-block mb-1">Customers Stored</span>
+                <h2 class="fw-bold mb-0">@ViewBag.CustomerCount</h2>
+                <a asp-action="Customers" class="text-info small text-decoration-none d-inline-block mt-2">View Directory &rarr;</a>
+            </div>
+            <div class="fs-1 text-primary"><i class="bi bi-people-fill"></i></div>
+        </div>
+    </div>
+
+    <!-- Stat 2: Products -->
+    <div class="col-md-6 col-lg-3">
+        <div class="glass-panel p-4 h-100 d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-white-50 small d-block mb-1">Inventory Items</span>
+                <h2 class="fw-bold mb-0">@ViewBag.ProductCount</h2>
+                <a asp-action="Products" class="text-info small text-decoration-none d-inline-block mt-2">Manage Stock &rarr;</a>
+            </div>
+            <div class="fs-1 text-info"><i class="bi bi-box-seam-fill"></i></div>
+        </div>
+    </div>
+
+    <!-- Stat 3: Queue messages -->
+    <div class="col-md-6 col-lg-3">
+        <div class="glass-panel p-4 h-100 d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-white-50 small d-block mb-1">Pending Orders</span>
+                <h2 class="fw-bold mb-0">@ViewBag.QueueCount</h2>
+                <a asp-action="Queue" class="text-info small text-decoration-none d-inline-block mt-2">Process Queue &rarr;</a>
+            </div>
+            <div class="fs-1 text-warning"><i class="bi bi-envelope-paper-fill"></i></div>
+        </div>
+    </div>
+
+    <!-- Stat 4: File Share Logs -->
+    <div class="col-md-6 col-lg-3">
+        <div class="glass-panel p-4 h-100 d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-white-50 small d-block mb-1">Audit Log Entries</span>
+                <h2 class="fw-bold mb-0">@ViewBag.LogCount</h2>
+                <a asp-action="Logs" class="text-info small text-decoration-none d-inline-block mt-2">Read Share &rarr;</a>
+            </div>
+            <div class="fs-1 text-danger"><i class="bi bi-terminal-fill"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="glass-panel p-4 h-100">
+            <h4 class="fw-bold mb-3"><i class="bi bi-cpu-fill text-gradient me-2"></i>Infrastructure Overview</h4>
+            <p class="text-white-50">
+                This administration dashboard coordinates client requests across four distinct cloud computing nodes. It enables real-time testing of storage endpoints, queuing latency, and file auditing systems directly.
+            </p>
+            
+            <div class="table-responsive mt-4">
+                <table class="table table-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th>Storage Service</th>
+                            <th>Resource Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="bi bi-table text-primary me-2"></i>Table Storage</td>
+                            <td><code>Customers</code>, <code>Products</code></td>
+                            <td><span class="badge bg-success">Online</span></td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-images text-info me-2"></i>Blob Storage</td>
+                            <td><code>product-images</code></td>
+                            <td><span class="badge bg-success">Online</span></td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-layers-half text-warning me-2"></i>Queue Storage</td>
+                            <td><code>order-processing-queue</code></td>
+                            <td><span class="badge bg-success">Online</span></td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-folder-symlink text-danger me-2"></i>File Share</td>
+                            <td><code>logs-share</code> (<code>abc-retail-logs.txt</code>)</td>
+                            <td><span class="badge bg-success">Online</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="glass-panel p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <h4 class="fw-bold mb-3"><i class="bi bi-activity text-gradient me-2"></i>Quick Actions</h4>
+                <p class="text-white-50 small">Execute administrative tasks and inventory updates quickly.</p>
+            </div>
+            <div class="d-flex flex-column gap-2 mt-3">
+                <a asp-action="AddProduct" class="btn btn-rainbow w-100 text-start">
+                    <i class="bi bi-plus-circle-fill me-2"></i>Add New Product
+                </a>
+                <a asp-action="Queue" class="btn btn-glass w-100 text-start">
+                    <i class="bi bi-gear-wide-connected me-2"></i>Process Order Queue
+                </a>
+                <a asp-action="Logs" class="btn btn-glass w-100 text-start">
+                    <i class="bi bi-file-earmark-text me-2"></i>Audit File Logs
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

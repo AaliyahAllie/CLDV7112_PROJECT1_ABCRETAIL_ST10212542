@@ -1,0 +1,60 @@
+@model IEnumerable<CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.CustomerProfile>
+@{
+    ViewData["Title"] = "Customer Profiles Directory";
+}
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="display-6 fw-bold mb-1"><span class="text-gradient">Customer Profiles</span></h1>
+        <p class="text-white-50">Manage registered user accounts stored in the Azure Tables database. PartitionKey: <code>Customer</code>.</p>
+    </div>
+</div>
+
+<div class="glass-panel p-4">
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-people display-3 text-muted mb-3"></i>
+            <h5 class="fw-semibold text-white">No Customers Registered</h5>
+            <p class="text-white-50 mb-0">Use the public Sign Up page to register customer profiles.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th>Customer Name</th>
+                        <th>Email Address</th>
+                        <th>Phone Number</th>
+                        <th>Partition Key</th>
+                        <th>Customer ID (RowKey)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong class="text-white">@item.FirstName @item.LastName</strong>
+                            </td>
+                            <td>
+                                <a href="mailto:@item.Email" class="text-info text-decoration-none">@item.Email</a>
+                            </td>
+                            <td>
+                                <span class="text-white-50">@item.PhoneNumber</span>
+                            </td>
+                            <td>
+                                <code>@item.PartitionKey</code>
+                            </td>
+                            <td>
+                                <code class="text-white-50">@item.RowKey</code>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

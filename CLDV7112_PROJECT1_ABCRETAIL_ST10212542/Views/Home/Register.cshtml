@@ -1,0 +1,60 @@
+@model CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.CustomerProfile
+@{
+    ViewData["Title"] = "Customer Registration";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="glass-panel p-5">
+            <div class="text-center mb-4">
+                <i class="bi bi-person-plus display-4 text-gradient"></i>
+                <h2 class="fw-bold mt-2">Create Customer Account</h2>
+                <p class="text-white-50 small">Register your profile directly into Azure Table Storage</p>
+            </div>
+
+            <form asp-action="Register" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FirstName" class="label-custom"></label>
+                        <input asp-for="FirstName" class="form-control form-glass" placeholder="John" required />
+                        <span asp-validation-for="FirstName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="LastName" class="label-custom"></label>
+                        <input asp-for="LastName" class="form-control form-glass" placeholder="Doe" required />
+                        <span asp-validation-for="LastName" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="label-custom"></label>
+                    <input asp-for="Email" class="form-control form-glass" placeholder="john.doe@example.com" required />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="label-custom"></label>
+                    <input asp-for="PhoneNumber" class="form-control form-glass" placeholder="+27 82 123 4567" required />
+                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Password" class="label-custom"></label>
+                    <input asp-for="Password" type="password" class="form-control form-glass" placeholder="••••••••" required />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-rainbow w-100 py-2">
+                    <i class="bi bi-person-check-fill me-2"></i>Register & Sign In
+                </button>
+            </form>
+
+            <div class="text-center mt-4">
+                <span class="text-white-50 small">Already have an account? </span>
+                <a asp-action="Login" class="text-info small text-decoration-none">Sign in here</a>
+            </div>
+        </div>
+    </div>
+</div>

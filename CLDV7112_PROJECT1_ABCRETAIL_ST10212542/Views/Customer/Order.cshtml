@@ -1,0 +1,61 @@
+@model CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.Product
+@{
+    ViewData["Title"] = "Confirm Order";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="glass-panel p-5">
+            <div class="mb-4">
+                <a asp-action="Index" class="text-info text-decoration-none small">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Catalog
+                </a>
+            </div>
+
+            <h2 class="fw-bold mb-4"><span class="text-gradient">Confirm Your Order</span></h2>
+
+            <div class="row g-4 align-items-center mb-4">
+                <div class="col-sm-5">
+                    <div class="product-img-wrapper rounded border border-secondary" style="padding-top: 100%;">
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <img src="@Model.ImageUrl" alt="@Model.Name" class="product-img" />
+                        }
+                        else
+                        {
+                            <div class="d-flex align-items-center justify-content-center h-100 bg-secondary text-white">
+                                <i class="bi bi-box-seam fs-1"></i>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-sm-7">
+                    <span class="badge bg-secondary mb-2">@Model.Category</span>
+                    <h3 class="fw-bold text-white mb-2">@Model.Name</h3>
+                    <h2 class="fw-bold text-price mb-4">@Model.Price.ToString("C")</h2>
+
+                    <div class="text-white-50 small mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>In stock & ready to ship
+                    </div>
+                    <div class="text-white-50 small">
+                        <i class="bi bi-clock-history text-info me-2"></i>Order processed asynchronously via Azure Queue
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-top border-secondary pt-4">
+                <form asp-action="PlaceOrder" method="post">
+                    <input type="hidden" name="productId" value="@Model.RowKey" />
+
+                    <div class="mb-4 p-3 bg-dark border border-secondary rounded text-white-50 small">
+                        <i class="bi bi-info-circle me-1"></i> Placed orders trigger background workers by appending a message to our order processing queue and writing an audit trail in Azure Files.
+                    </div>
+
+                    <button type="submit" class="btn btn-rainbow btn-lg w-100 py-2.5">
+                        <i class="bi bi-credit-card-fill me-2"></i>Place Order & Notify Warehouse
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+@model IEnumerable<CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.LogEntry>
+@{
+    ViewData["Title"] = "System Logs Share";
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h1 class="display-6 fw-bold mb-1"><span class="text-gradient">System Audit Logs</span></h1>
+        <p class="text-white-50">Auditing file share records retrieved directly from Azure Files (<code>logs-share/abc-retail-logs.txt</code>).</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <form asp-action="ClearLogs" method="post" onsubmit="return confirm('Are you sure you want to clear the logs in the File Share? This will truncate the file.');">
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-trash-fill me-2"></i>Clear Audit File
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+                <span class="text-white-50 ms-3 small">logs-share/abc-retail-logs.txt - Live Console Log</span>
+            </div>
+            <div class="terminal-body">
+                @if (!Model.Any())
+                {
+                    <div class="text-white-50 text-center py-3">No log records found.</div>
+                }
+                else
+                {
+                    @foreach (var log in Model)
+                    {
+                        var levelClass = log.Level == "ERROR" ? "log-error" : (log.Level == "WARNING" ? "log-warning" : "log-info");
+                        <div class="mb-1">
+                            <span class="log-timestamp">[@log.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")]</span>
+                            <span class="@levelClass">[@log.Level]</span>
+                            <span class="text-white-50">@log.Message</span>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

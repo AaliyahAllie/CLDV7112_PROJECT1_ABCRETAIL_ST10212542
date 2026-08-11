@@ -1,0 +1,161 @@
+@model IEnumerable<CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.Product>
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "ABC Retail - Cloud Enabled E-Commerce";
+    var userRole = HttpContextAccessor.HttpContext?.Session.GetString("UserRole");
+}
+
+<!-- Hero Section -->
+<div class="hero-section text-center position-relative py-5 overflow-hidden">
+    <div class="hero-glow"></div>
+    <h1 class="display-3 fw-bold mb-3"><span class="text-gradient">ABC Retail Store</span></h1>
+    <h2 class="display-6 fw-medium text-white mb-4">Premium Goods, Driven by Cloud Innovation</h2>
+    <p class="hero-subtitle mb-4">
+        Welcome to ABC Retail, where quality meets technological excellence. We offer a curated collection of seasonal products, clothing, electronics, and gifts, delivered instantly using high-availability Azure Cloud architecture.
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+        @if (string.IsNullOrEmpty(userRole))
+        {
+            <a asp-controller="Home" asp-action="Register" class="btn btn-rainbow btn-lg">
+                <i class="bi bi-rocket-takeoff-fill me-2"></i>Create Customer Account
+            </a>
+            <a href="#products-section" class="btn btn-glass btn-lg">
+                <i class="bi bi-bag-fill me-2"></i>Browse Products
+            </a>
+        }
+        else if (userRole == "Customer")
+        {
+            <a asp-controller="Customer" asp-action="Index" class="btn btn-rainbow btn-lg">
+                <i class="bi bi-bag-check-fill me-2"></i>Enter Shop Catalog
+            </a>
+        }
+        else if (userRole == "Admin")
+        {
+            <a asp-controller="Admin" asp-action="Index" class="btn btn-rainbow btn-lg">
+                <i class="bi bi-speedometer2 me-2"></i>Go to Admin Console
+            </a>
+        }
+    </div>
+</div>
+
+<!-- About ABC Retail Section -->
+<div class="row mt-5 py-4 justify-content-center align-items-center">
+    <div class="col-lg-8">
+        <div class="glass-panel p-5 text-center">
+            <h2 class="fw-bold mb-3"><span class="text-gradient">Our Retail Mission</span></h2>
+            <p class="lead text-white">
+                At ABC Retail, we believe online shopping should be seamless, reliable, and secure.
+            </p>
+            <p class="text-white-50">
+                To combat slow loading times and inventory lag common in traditional setups, we migrated our operations to Azure. By pairing Azure NoSQL tables for catalog management, Blob containers for asset delivery, and distributed queue systems for order notifications, we ensure an instant, reliable experience even during high-traffic holiday spikes.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Services Grid -->
+<div class="row mt-5 g-4 justify-content-center">
+    <div class="col-md-12 text-center mb-2">
+        <h3 class="fw-bold"><i class="bi bi-award text-gradient me-2"></i>Premium Services We Provide</h3>
+        <p class="text-white-50">Discover why thousands of customers choose ABC Retail for their online shopping needs.</p>
+    </div>
+
+    <div class="col-md-4">
+        <div class="glass-panel glass-panel-hover p-4 text-center h-100">
+            <div class="fs-1 text-primary mb-3"><i class="bi bi-truck"></i></div>
+            <h5 class="fw-bold text-white">Express Delivery</h5>
+            <p class="text-white-50 small mb-0">
+                Our automated warehouse routing queues process payments instantly and schedule courier pickups within hours of placing your order.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="glass-panel glass-panel-hover p-4 text-center h-100">
+            <div class="fs-1 text-info mb-3"><i class="bi bi-shield-check"></i></div>
+            <h5 class="fw-bold text-white">Secure Encrypted Checkouts</h5>
+            <p class="text-white-50 small mb-0">
+                Customer profiles and authentication tokens are partitioned and protected by advanced database policies, keeping your data confidential.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="glass-panel glass-panel-hover p-4 text-center h-100">
+            <div class="fs-1 text-warning mb-3"><i class="bi bi-clock-history"></i></div>
+            <h5 class="fw-bold text-white">24/7 Service Auditing</h5>
+            <p class="text-white-50 small mb-0">
+                Every transaction and stock movement logs directly to a central cloud shared drive to maintain accountability and eliminate shipping errors.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Product Catalog Section (BROWSE PRODUCTS) -->
+<div id="products-section" class="row mt-5 pt-4 g-4 justify-content-center">
+    <div class="col-md-12 text-center mb-3">
+        <h3 class="fw-bold"><i class="bi bi-bag-heart-fill text-gradient me-2"></i>Browse Our Live Catalog</h3>
+        <p class="text-white-50">Explore our active inventory served directly from Azure Storage.</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="col-md-8 text-center">
+            <div class="glass-panel p-5 text-center">
+                <i class="bi bi-box-seam display-3 text-muted mb-3 d-block"></i>
+                <h5 class="fw-semibold text-white">No products uploaded yet</h5>
+                <p class="text-white-50 mb-0">
+                    Our inventory is empty. Please sign in as an Administrator to upload products and images.
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var product in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="glass-panel product-card glass-panel-hover">
+                    <div class="product-img-wrapper">
+                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                        {
+                            <img src="@product.ImageUrl" alt="@product.Name" class="product-img" />
+                        }
+                        else
+                        {
+                            <div class="d-flex align-items-center justify-content-center h-100 bg-secondary text-white">
+                                <i class="bi bi-box-seam fs-1"></i>
+                            </div>
+                        }
+                        <span class="product-category-badge">@product.Category</span>
+                    </div>
+                    <div class="product-info">
+                        <div>
+                            <h4 class="fw-bold mb-1 text-white">@product.Name</h4>
+                            <h3 class="fw-bold text-price mb-3">@product.Price.ToString("C")</h3>
+                        </div>
+
+                        @if (string.IsNullOrEmpty(userRole))
+                        {
+                            <a asp-controller="Home" asp-action="Login" class="btn btn-rainbow w-100 mt-2">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to Buy
+                            </a>
+                        }
+                        else if (userRole == "Customer")
+                        {
+                            <a asp-controller="Customer" asp-action="Order" asp-route-productId="@product.RowKey" class="btn btn-rainbow w-100 mt-2">
+                                <i class="bi bi-cart-plus-fill me-2"></i>Order Now
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-glass w-100 mt-2" disabled>
+                                <i class="bi bi-shield-fill-exclamation me-2"></i>Admin Mode
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

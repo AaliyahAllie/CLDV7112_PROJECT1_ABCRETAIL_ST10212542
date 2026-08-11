@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "Sign In";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="glass-panel p-5">
+            <div class="text-center mb-4">
+                <i class="bi bi-shield-lock display-4 text-gradient"></i>
+                <h2 class="fw-bold mt-2">Welcome Back</h2>
+                <p class="text-white-50 small">Sign in to your customer profile or administrator console</p>
+            </div>
+
+            <form asp-action="Login" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                <div class="mb-3">
+                    <label class="label-custom" for="usernameOrEmail">Email Address or Admin Username</label>
+                    <input type="text" id="usernameOrEmail" name="usernameOrEmail" class="form-control form-glass" placeholder="e.g. customer@example.com or admin" required />
+                </div>
+
+                <div class="mb-4">
+                    <label class="label-custom" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control form-glass" placeholder="••••••••" required />
+                </div>
+
+                <button type="submit" class="btn btn-rainbow w-100 py-2">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </button>
+            </form>
+
+            <div class="text-center mt-4">
+                <span class="text-white-50 small">Don't have an account? </span>
+                <a asp-action="Register" class="text-info small text-decoration-none">Create account</a>
+            </div>
+
+            <div class="mt-4 p-3 rounded bg-dark border border-secondary text-white-50 small">
+                <strong class="text-white d-block mb-1"><i class="bi bi-info-circle me-1"></i>Demo Credentials:</strong>
+                <span>Admin: <code class="text-info">admin</code> / <code class="text-info">Password123!</code></span><br/>
+                <span>Customer: Click "Sign Up" to register directly into Azure Table Storage.</span>
+            </div>
+        </div>
+    </div>
+</div>
