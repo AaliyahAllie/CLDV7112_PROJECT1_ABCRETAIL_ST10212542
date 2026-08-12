@@ -1,164 +1,163 @@
 # 🛒 ABC Retail – Azure Storage Web Application
 
-> A cloud-based retail web application built with **ASP.NET Core MVC** and deployed to **Microsoft Azure App Service**, integrating all four core Azure Storage services.
+> A cloud-based e-commerce retail platform built with **ASP.NET Core MVC (.NET 9)** and deployed to **Microsoft Azure App Service**, powered by Azure Storage Services and **Stripe** payment processing.
 
 ---
 
 ## 📋 Table of Contents
 
-- [About the Project](#about-the-project)
-- [Built With](#built-with)
-- [Azure Services Used](#azure-services-used)
-- [Features](#features)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Local Setup](#local-setup)
-- [Azure Configuration](#azure-configuration)
-- [Project Structure](#project-structure)
-- [User Roles](#user-roles)
-- [Deployment](#deployment)
-- [Acknowledgements](#acknowledgements)
+- [Project Information](#-project-information)
+- [System Architecture & Azure Services](#-system-architecture--azure-services)
+- [Key Features](#-key-features)
+- [Tech Stack & NuGet Packages](#-tech-stack--nuget-packages)
+- [Project Rubric Alignment](#-project-rubric-alignment)
+- [Project Structure](#-project-structure)
+- [Getting Started (Local Development)](#-getting-started-local-development)
+- [Azure Deployment Guide](#-azure-deployment-guide)
+- [User Roles & Testing Credentials](#-user-roles--testing-credentials)
+- [Acknowledgements](#-acknowledgements)
 
 ---
 
-## 📖 About the Project
+## 👤 Project Information
 
-**ABC Retail** is a full-stack retail platform developed for the CLDV7112 Cloud Development module (Project 1). The application demonstrates the use of Microsoft Azure Storage services within a real-world e-commerce scenario. It supports three distinct user experiences:
-
-- A **public landing page** where visitors can browse the product catalogue without signing in
-- A **customer portal** for registered users to shop, place orders, and view their personal order history
-- An **admin portal** for managing inventory, monitoring orders, and reading system logs
-
-The project was developed to satisfy the following Azure Storage requirements:
-- **Azure Table Storage** – Structured data (customers, products, orders)
-- **Azure Blob Storage** – Product image hosting
-- **Azure Queue Storage** – Asynchronous order processing
-- **Azure File Storage** – Centralised application audit logging
+- **Module Code:** CLDV7112 – Cloud Development B
+- **Assessment:** Project 1
+- **Student Number:** ST1021542
+- **Deployed App Service URL:** `https://CLDV7112-PROJECT1-ABCRETAIL-ST1021542.azurewebsites.net`
 
 ---
 
-## 🛠️ Built With
+## ☁️ System Architecture & Azure Services
 
-| Technology | Purpose |
-|---|---|
-| ASP.NET Core MVC (.NET 9) | Web application framework |
-| C# | Backend programming language |
-| Azure.Data.Tables SDK | Azure Table Storage integration |
-| Azure.Storage.Blobs SDK | Azure Blob Storage integration |
-| Azure.Storage.Queues SDK | Azure Queue Storage integration |
-| Azure.Storage.Files.Shares SDK | Azure File Storage integration |
-| Bootstrap 5 | Responsive UI layout |
-| Vanilla CSS (Glassmorphism) | Custom dark-mode visual theme |
-| Bootstrap Icons | UI iconography |
-| Azure App Service | Cloud hosting and deployment |
+This application is built natively on top of the **4 core Azure Storage Services** (no SQL or EF Core required):
 
----
+### 🗃️ 1. Azure Table Storage (`Azure.Data.Tables`)
+Stores structured application entities in NoSQL tables:
+- **`Customers`** – Customer registration profiles (FirstName, LastName, Email, Phone, Password). PartitionKey: `"Customer"`.
+- **`Products`** – Product catalogue (Name, Category, Price, StockQuantity, Description, Blob Image URL). PartitionKey: `"Product"`.
+- **`Orders`** – Customer purchase transactions (ProductName, ProductPrice, Quantity, TotalAmount, PaymentStatus, PaymentIntentId, Status). PartitionKey: `CustomerId` (ensures customer privacy and data isolation).
 
-## ☁️ Azure Services Used
+### 🖼️ 2. Azure Blob Storage (`Azure.Storage.Blobs`)
+- Container: **`product-images`** (Public read access)
+- Administrators upload product imagery through the portal. Files are streamed directly to Blob Storage, and their public HTTPS URLs are stored in the Products table for instant rendering.
 
-### 🗃️ Azure Table Storage
-Three tables are created automatically on application startup:
-- **`Customers`** – Stores registered customer profiles (name, email, phone, hashed password). Partition Key: `"Customer"`.
-- **`Products`** – Stores product inventory (name, category, price, blob image URL). Partition Key: `"Product"`.
-- **`Orders`** – Stores placed orders per customer. Partition Key: `CustomerId` (ensures each customer can only query their own orders).
+### 📨 3. Azure Queue Storage (`Azure.Storage.Queues`)
+- Queue: **`order-processing-queue`**
+- Asynchronous message queue for warehouse fulfilment and auditing. Enqueues formatted transaction and inventory messages:
+  - `[ORDER-TRANSACTION]` – Placed & paid orders
+  - `[INVENTORY-ADD]` – New product additions
+  - `[INVENTORY-REMOVE]` – Deleted products
+  - `[ORDER-STATUS-UPDATE]` – Status updates (Processing → Shipped → Delivered)
 
-### 🖼️ Azure Blob Storage
-- Container: **`product-images`** (public read access)
-- Administrators upload product images through the portal; images are stored in Blob Storage and their public URLs are saved in the Products table for direct browser rendering.
-
-### 📨 Azure Queue Storage
-- Queue: **`orders-queue`**
-- When a customer places an order, a structured message is enqueued containing the customer name, ID, product name, price, and processing status.
-- Administrators can peek at and dequeue messages through the Admin Portal.
-
-### 📁 Azure File Storage
-- File Share: **`logs-share`**
-- Log File: **`abc-retail-logs.txt`**
-- All key application events (registrations, product uploads, orders) are appended to a centralised log file stored in Azure File Storage. Admins can view the full log from the portal.
+### 📁 4. Azure File Storage (`Azure.Storage.Files.Shares`)
+- Share: **`logs-share`**
+- Implements **5 distinct named log files** for domain-driven cloud auditing:
+  1. **`system-logs.txt`** – Startup and core application events
+  2. **`order-logs.txt`** – Order transactions and payment confirmations
+  3. **`product-logs.txt`** – Inventory uploads, edits, and deletions
+  4. **`customer-logs.txt`** – Customer registrations and logins
+  5. **`error-logs.txt`** – System exceptions and failed payment attempts
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-### Public Landing Page
-- Company overview and services showcase
-- Live product catalogue (read-only, no login required)
-- Sign In / Register call-to-action
-
-### Customer Portal
-- Register and login with email and password
-- Browse the live product catalogue
-- Place orders (queued via Azure Queue Storage)
-- View personal order history (isolated by Customer ID)
-
-### Admin Portal
-- Fixed admin credentials (configured in `appsettings.json`)
-- Upload new products with images (stored in Blob + Table)
-- Delete products (removes from Table and Blob Storage)
-- View all registered customer profiles
-- Peek and dequeue messages from the order queue
-- Read the full system log from Azure File Storage
+- **🛒 Session Shopping Cart:** Add items, adjust quantities, view line totals, and manage cart state with live navbar badges.
+- **💳 Stripe Payment Gateway Integration:** Secure test-mode checkout using Stripe Elements. Creates and verifies `PaymentIntents` server-side.
+- **📦 Real-Time Stock Management:** Displays live stock levels (*In Stock*, *Only X left!*), with automatic stock decrement upon payment.
+- **🚚 Admin Order Management:** Admins view all customer orders and manage fulfilment state (`Processing` $\rightarrow$ `Shipped` $\rightarrow$ `Delivered`).
+- **📋 5-Tab Cloud Log Browser:** Terminal-style log viewer in the Admin Portal for reading all 5 Azure File Storage log files.
+- **🔒 Security Hardening:** Enforces HTTPS, 1-year HSTS, SameSite=Lax session security, and anti-sniffing HTTP headers.
 
 ---
 
+## 🛠️ Tech Stack & NuGet Packages
 
+| Technology / Package | Version | Description |
+|---|---|---|
+| **ASP.NET Core MVC** | .NET 9.0 | Application framework |
+| **`Azure.Data.Tables`** | `12.11.0` | Azure Table Storage SDK |
+| **`Azure.Storage.Blobs`** | `12.29.1` | Azure Blob Storage SDK |
+| **`Azure.Storage.Queues`** | `12.27.1` | Azure Queue Storage SDK |
+| **`Azure.Storage.Files.Shares`** | `12.27.1` | Azure File Storage SDK |
+| **`Stripe.net`** | `52.3.0` | Stripe Payment Gateway SDK |
+| **Bootstrap 5 & Icons** | 5.3 / 1.11 | Visual styling and icons |
+| **Vanilla CSS (Glassmorphism)** | Custom | Modern dark-mode aesthetic |
+
+---
+
+## 💯 Project Rubric Alignment
+
+| Rubric Criteria | Score Target | How Requirement Is Satisfied in App |
+|---|---|---|
+| **1. Table Storage** | 16 – 20 | Web controls for `Customers`, `Products` (with stock levels & descriptions), and `Orders` tables. Supports 5+ records each. |
+| **2. Blob Storage** | 16 – 20 | Product image uploads stream to `product-images` container. Supports 5+ multimedia blobs. |
+| **3. Queue Storage** | 16 – 20 | Formatted messages enqueued for transactions (`[ORDER-TRANSACTION]`) and inventory (`[INVENTORY-ADD/REMOVE]`). Supports 5+ messages. |
+| **4. File Storage** | 16 – 20 | 5 named log files in `logs-share` (`system-logs.txt`, `order-logs.txt`, `product-logs.txt`, `customer-logs.txt`, `error-logs.txt`). Tabbed viewer in Admin Portal. |
+| **5. App Service Deployment** | 16 – 20 | Deployed to Azure App Service, HTTPS enabled, URL accessible, fully functional online environment. |
+
+---
 
 ## 📁 Project Structure
 
 ```
-ABCRetailWeb/
+CLDV7112_PROJECT1_ABCRETAIL_ST1021542/
 │
 ├── Controllers/
-│   ├── HomeController.cs        # Public pages, login, register
-│   ├── CustomerController.cs    # Customer portal, orders
-│   └── AdminController.cs       # Admin portal, inventory, logs
+│   ├── HomeController.cs        # Public landing, login, register, logout
+│   ├── CustomerController.cs    # Shop, checkout, Stripe payment confirmation, order history
+│   ├── CartController.cs        # Session cart management (add, update qty, remove, clear)
+│   └── AdminController.cs       # Admin dashboard, inventory, all orders, queue, 5-tab logs
 │
 ├── Models/
-│   ├── CustomerProfile.cs       # Azure Table entity - Customers
-│   ├── Product.cs               # Azure Table entity - Products
-│   ├── OrderEntity.cs           # Azure Table entity - Orders
+│   ├── CustomerProfile.cs       # Azure Table Entity – Customers
+│   ├── Product.cs               # Azure Table Entity – Products (with StockQuantity & Description)
+│   ├── OrderEntity.cs           # Azure Table Entity – Orders (with PaymentIntentId & TotalAmount)
+│   ├── CartItem.cs              # Session cart item model
 │   ├── QueueMessageModel.cs     # Queue message view model
 │   └── LogEntry.cs              # Log entry view model
 │
 ├── Services/
-│   ├── TableStorageService.cs   # Azure Table Storage operations
-│   ├── BlobStorageService.cs    # Azure Blob Storage operations
-│   ├── QueueStorageService.cs   # Azure Queue Storage operations
-│   └── FileShareService.cs      # Azure File Storage operations
+│   ├── TableStorageService.cs   # Azure Table CRUD + order queries + stock decrements
+│   ├── BlobStorageService.cs    # Azure Blob container upload & delete
+│   ├── QueueStorageService.cs   # Azure Queue enqueue, peek, dequeue, & clear
+│   ├── FileShareService.cs      # Azure File Share 5-file logger & reader
+│   └── StripePaymentService.cs  # Stripe PaymentIntent creation & verification
 │
 ├── Views/
-│   ├── Home/                    # Public landing, login, register
-│   ├── Customer/                # Shop, order, my orders
-│   ├── Admin/                   # Dashboard, inventory, customers, logs
-│   └── Shared/                  # Layout, navigation
+│   ├── Home/                    # Landing page, Login, Register, About
+│   ├── Customer/                # Shop, Checkout, PaymentSuccess, MyOrders
+│   ├── Cart/                    # Cart overview and quantity steppers
+│   ├── Admin/                   # Dashboard, Products, AddProduct, Orders, Queue, 5-tab Logs
+│   └── Shared/                  # Layout with cart badge, navigation, validation scripts
 │
 ├── wwwroot/
-│   └── css/site.css             # Custom glassmorphism dark theme
+│   └── css/site.css             # Glassmorphism dark-mode custom styling
 │
-├── appsettings.json             # App configuration (no secrets)
-└── Program.cs                   # App startup, middleware, DI setup
+├── appsettings.json             # App settings (Azure connection & Stripe test keys)
+└── Program.cs                   # Startup pipeline, DI singletons, Stripe config, session settings
 ```
-
 ---
 
-## 👥 User Roles
+## 🌐 Azure Deployment 
+LINK: https://st10212542-hdhjahh4d9g4fncm.southafricanorth-01.azurewebsites.net/
+---
 
-| Role | Access | Credentials |
+## 👥 User Roles & Testing Credentials
+
+| Role | Access Level | Credentials |
 |---|---|---|
-| **Public** | Landing page, product catalogue | No login required |
-| **Customer** | Shop, place orders, view own orders | Register via the app |
-| **Admin** | Full portal – inventory, customers, queue, logs | `admin` / `Password123!` |
+| **Public** | Browse product catalog, view landing page | No login required |
+| **Customer** | Add to cart, checkout with Stripe, view own order history | Register a new account via the app |
+| **Admin** | Upload/delete products, manage all orders, peek/dequeue queue, view 5 log files | Username: `admin` <br> Password: `Password123!` |
+
+### 💳 Stripe Test Card
+- **Card Number:** `4242 4242 4242 4242`
+- **Expiration:** Any future date (e.g. `12/28`)
+- **CVC:** Any 3 digits (e.g. `123`)
 
 ---
 
-## 🌐 Deployment
 
-The application is deployed to **Microsoft Azure App Service** in the South Africa North region.
-
-**Live URL:** `https://st10212542-hdhjahh4d9g4fncm.southafricanorth-01.azurewebsites.net/`
-
----
-
-
-
-*Developed as part of CLDV7112 – Cloud Development B, Project 1.*
+*Developed for CLDV7112 Cloud Development B – Project 1.*
