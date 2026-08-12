@@ -7,16 +7,14 @@ namespace CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models
 {
     public class Product : ITableEntity
     {
-        // ITableEntity required properties
         public string PartitionKey { get; set; } = "Product";
 
         [Required]
-        public string RowKey { get; set; } // ProductId
+        public string RowKey { get; set; }
 
         public DateTimeOffset? Timestamp { get; set; }
         public ETag ETag { get; set; }
 
-        // Product specific properties
         [Required]
         public string Name { get; set; }
 
@@ -27,7 +25,15 @@ namespace CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models
         [Required]
         public string Category { get; set; }
 
+        [Display(Name = "Description")]
+        public string Description { get; set; }
+
+        [Required]
+        [Range(0, 10000, ErrorMessage = "Stock quantity must be between 0 and 10,000.")]
+        [Display(Name = "Stock Quantity")]
+        public int StockQuantity { get; set; }
+
         [Display(Name = "Image URL")]
-        public string ImageUrl { get; set; } // Uploaded to blob storage
+        public string ImageUrl { get; set; }
     }
 }

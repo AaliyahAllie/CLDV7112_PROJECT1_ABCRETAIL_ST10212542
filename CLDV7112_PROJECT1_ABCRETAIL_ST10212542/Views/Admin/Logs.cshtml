@@ -1,49 +1,106 @@
-@model IEnumerable<CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.LogEntry>
+﻿@model IEnumerable<CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.LogEntry>
 @{
-    ViewData["Title"] = "System Logs Share";
+    ViewData["Title"] = "System Logs";
+    var logFiles = ViewBag.LogFileNames as string[];
+    var activeFile = ViewBag.ActiveFile as string ?? "system-logs.txt";
+
+    var displayNames = new Dictionary<string, string>
+    {
+        ["system-logs.txt"] = "System",
+        ["order-logs.txt"] = "Orders",
+        ["product-logs.txt"] = "Products",
+        ["customer-logs.txt"] = "Customers",
+        ["error-logs.txt"] = "Errors"
+    };
+    var icons = new Dictionary<string, string>
+    {
+        ["system-logs.txt"] = "bi-gear",
+        ["order-logs.txt"] = "bi-bag-check",
+        ["product-logs.txt"] = "bi-box-seam",
+        ["customer-logs.txt"] = "bi-people",
+        ["error-logs.txt"] = "bi-exclamation-triangle"
+    };
 }
 
 <div class="row mb-4 align-items-center">
     <div class="col-md-8">
-        <h1 class="display-6 fw-bold mb-1"><span class="text-gradient">System Audit Logs</span></h1>
-        <p class="text-white-50">Auditing file share records retrieved directly from Azure Files (<code>logs-share/abc-retail-logs.txt</code>).</p>
+        <h1 class="display-6 fw-bold"><span class="text-gradient">📋 System Logs</span></h1>
+        <p class="text-white-50">
+            Log entries are stored as named files in <strong class="text-white">Azure File Storage</strong>
+            (<code>logs-share</code>). Each file tracks a different operational domain.
+        </p>
     </div>
     <div class="col-md-4 text-md-end">
-        <form asp-action="ClearLogs" method="post" onsubmit="return confirm('Are you sure you want to clear the logs in the File Share? This will truncate the file.');">
-            <button type="submit" class="btn btn-outline-danger">
-                <i class="bi bi-trash-fill me-2"></i>Clear Audit File
+        <form asp-action="ClearLogs" method="post" class="d-inline">
+            <input type="hidden" name="file" value="@activeFile" />
+            <button type="submit" class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('Clear this log file?')">
+                <i class="bi bi-trash3 me-1"></i>Clear @(displayNames.ContainsKey(activeFile) ? displayNames[activeFile] : activeFile) Log
             </button>
         </form>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-lg-12">
-        <div class="terminal-window">
-            <div class="terminal-header">
-                <span class="terminal-dot dot-red"></span>
-                <span class="terminal-dot dot-yellow"></span>
-                <span class="terminal-dot dot-green"></span>
-                <span class="text-white-50 ms-3 small">logs-share/abc-retail-logs.txt - Live Console Log</span>
-            </div>
-            <div class="terminal-body">
-                @if (!Model.Any())
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success border-0 glass-panel mb-4">✅ @TempData["Success"]</div>
+}
+
+<!-- 5 Log File Tabs (satisfies rubric: 5 named files in Azure File Storage) -->
+<ul class="nav mb-4" style="gap:8px;">
+    @foreach (var file in logFiles ?? Array.Empty<string>())
+    {
+        var isActive = file == activeFile;
+        var display = displayNames.ContainsKey(file) ? displayNames[file] : file;
+        var icon = icons.ContainsKey(file) ? icons[file] : "bi-file-text";
+        <li class="nav-item">
+            <a href="@Url.Action("Logs", new { file })"
+               class="btn @(isActive ? "btn-rainbow" : "btn-glass") btn-sm">
+                <i class="bi @icon me-1"></i>@display
+            </a>
+        </li>
+    }
+</ul>
+
+<!-- Active file info -->
+<div class="glass-panel p-3 mb-3 d-flex align-items-center gap-3">
+    <i class="bi bi-file-earmark-text fs-4 text-gradient"></i>
+    <div>
+        <strong class="text-white d-block">@activeFile</strong>
+        <small class="text-white-50">Azure File Share: <code>logs-share/@activeFile</code> · @Model.Count() entries</small>
+    </div>
+</div>
+
+<!-- Log Entries -->
+<div class="terminal-window">
+    <div class="terminal-header">
+        <span class="terminal-dot dot-red"></span>
+        <span class="terminal-dot dot-yellow"></span>
+        <span class="terminal-dot dot-green"></span>
+        <span class="text-white-50 small ms-3">@activeFile</span>
+    </div>
+    <div class="terminal-body">
+        @if (!Model.Any())
+        {
+            <p class="text-muted mb-0">No log entries in this file yet.</p>
+        }
+        else
+        {
+            @foreach (var entry in Model)
+            {
+                var css = entry.Level switch
                 {
-                    <div class="text-white-50 text-center py-3">No log records found.</div>
-                }
-                else
-                {
-                    @foreach (var log in Model)
-                    {
-                        var levelClass = log.Level == "ERROR" ? "log-error" : (log.Level == "WARNING" ? "log-warning" : "log-info");
-                        <div class="mb-1">
-                            <span class="log-timestamp">[@log.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")]</span>
-                            <span class="@levelClass">[@log.Level]</span>
-                            <span class="text-white-50">@log.Message</span>
-                        </div>
-                    }
-                }
-            </div>
-        </div>
+                    "INFO" => "log-info",
+                    "WARNING" => "log-warning",
+                    "ERROR" => "log-error",
+                    _ => "text-white-50"
+                };
+                <div class="mb-1">
+                    <span class="log-timestamp">[@entry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")]</span>
+                    <span class="@css fw-semibold"> [@entry.Level]</span>
+                    <span class="text-white"> @entry.Message</span>
+                </div>
+            }
+        }
     </div>
 </div>

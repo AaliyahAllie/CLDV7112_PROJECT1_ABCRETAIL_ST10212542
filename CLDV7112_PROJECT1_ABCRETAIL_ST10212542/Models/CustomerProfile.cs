@@ -9,10 +9,10 @@ namespace CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models
     {
         // ITableEntity required properties
         public string PartitionKey { get; set; } = "Customer";
-        
+
         [Required]
         public string RowKey { get; set; } // CustomerId
-        
+
         public DateTimeOffset? Timestamp { get; set; }
         public ETag ETag { get; set; }
 

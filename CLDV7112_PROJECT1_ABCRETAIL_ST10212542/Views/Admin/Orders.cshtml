@@ -1,0 +1,109 @@
+﻿@model IEnumerable<CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.OrderEntity>
+@{
+    ViewData["Title"] = "All Orders";
+}
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="display-6 fw-bold"><span class="text-gradient">📦 All Orders</span></h1>
+        <p class="text-white-50">View and manage every order placed across all customers.</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a asp-action="Index" class="btn btn-glass btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success border-0 glass-panel mb-4">✅ @TempData["Success"]</div>
+}
+
+<div class="glass-panel p-4">
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-inbox display-3 text-muted d-block mb-3"></i>
+            <h5 class="text-white">No orders yet</h5>
+            <p class="text-white-50">Orders will appear here once customers complete a purchase.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Customer</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-end">Total</th>
+                        <th>Date</th>
+                        <th class="text-center">Payment</th>
+                        <th class="text-center" style="width:220px;">Order Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        var payBadge = order.PaymentStatus == "Paid" ? "bg-success" : "bg-warning text-dark";
+                        var statusBadge = order.Status switch
+                        {
+                            "Processing" => "bg-warning text-dark",
+                            "Shipped" => "bg-info text-dark",
+                            "Delivered" => "bg-success",
+                            "Cancelled" => "bg-danger",
+                            _ => "bg-secondary"
+                        };
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (!string.IsNullOrEmpty(order.ImageUrl))
+                                    {
+                                        <img src="@order.ImageUrl" alt="@order.ProductName"
+                                             style="width:42px;height:42px;object-fit:cover;border-radius:6px;" />
+                                    }
+                                    <div>
+                                        <strong class="text-white d-block">@order.ProductName</strong>
+                                        <small class="text-white-50">@order.RowKey.Substring(0, 8)...</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-white d-block">@(order.CustomerName ?? "—")</span>
+                                <small class="text-white-50">@(order.CustomerEmail ?? "—")</small>
+                            </td>
+                            <td class="text-center text-white">@order.Quantity</td>
+                            <td class="text-end fw-bold text-price">R@order.TotalAmount.ToString("F2")</td>
+                            <td><small class="text-white-50">@order.OrderDate.ToString("yyyy-MM-dd HH:mm")</small></td>
+                            <td class="text-center"><span class="badge @payBadge">@order.PaymentStatus</span></td>
+                            <td class="text-center">
+                                @if (order.Status != "Delivered" && order.Status != "Cancelled")
+                                {
+                                    <form asp-action="UpdateOrderStatus" method="post" class="d-flex gap-1 align-items-center justify-content-center">
+                                        <input type="hidden" name="customerId" value="@order.PartitionKey" />
+                                        <input type="hidden" name="orderId" value="@order.RowKey" />
+                                        <select name="newStatus" class="form-select form-glass form-select-sm" style="width:130px;">
+                                            <option value="Processing" selected="@(order.Status == "Processing")">Processing</option>
+                                            <option value="Shipped" selected="@(order.Status == "Shipped")">Shipped</option>
+                                            <option value="Delivered" selected="@(order.Status == "Delivered")">Delivered</option>
+                                            <option value="Cancelled" selected="@(order.Status == "Cancelled")">Cancelled</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-glass">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="badge @statusBadge">@order.Status</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

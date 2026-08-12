@@ -1,7 +1,19 @@
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@using System.Text.Json
 @{
     var userRole = HttpContextAccessor.HttpContext?.Session.GetString("UserRole");
     var userName = HttpContextAccessor.HttpContext?.Session.GetString("UserName");
+    var cartJson = HttpContextAccessor.HttpContext?.Session.GetString("Cart");
+    var cartCount = 0;
+    if (!string.IsNullOrEmpty(cartJson))
+    {
+        try
+        {
+            var cartItems = JsonSerializer.Deserialize<List<CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.CartItem>>(cartJson);
+            cartCount = cartItems?.Sum(x => x.Quantity) ?? 0;
+        }
+        catch { }
+    }
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -65,6 +77,11 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link nav-link-custom" asp-controller="Admin" asp-action="Orders">
+                                    <i class="bi bi-receipt me-1"></i>Orders
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link nav-link-custom" asp-controller="Admin" asp-action="Customers">
                                     <i class="bi bi-people-fill me-1"></i>Customers
                                 </a>
@@ -84,6 +101,16 @@
                     <div class="d-flex align-items-center">
                         @if (!string.IsNullOrEmpty(userRole))
                         {
+                            @if (userRole == "Customer")
+                            {
+                                <a asp-controller="Cart" asp-action="Index" class="btn btn-glass btn-sm me-2 position-relative">
+                                    <i class="bi bi-cart3"></i>
+                                    @if (cartCount > 0)
+                                    {
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.65rem;">@cartCount</span>
+                                    }
+                                </a>
+                            }
                             <span class="text-white-50 me-3">
                                 <i class="bi bi-person-circle me-1"></i>Hello, <strong>@userName</strong>
                                 <span class="badge bg-secondary ms-1">@userRole</span>

@@ -1,79 +1,93 @@
-﻿@model IEnumerable<CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.OrderEntity>
-@{
-    ViewData["Title"] = "My Orders";
+﻿@{
+    ViewData["Title"] = "Payment Successful";
 }
 
-<div class="row mb-4">
-    <div class="col-md-8">
-        <h1 class="display-6 fw-bold mb-1"><span class="text-gradient">My Order History</span></h1>
-        <p class="text-white-50">Review the status of your past orders. Your data is isolated securely using your Customer ID.</p>
-    </div>
-    <div class="col-md-4 text-md-end">
-        <a asp-action="Index" class="btn btn-glass btn-sm">
-            <i class="bi bi-arrow-left me-1"></i> Back to Shop
-        </a>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-7 text-center">
+        <div class="glass-panel p-5">
+
+            <!-- Animated checkmark -->
+            <div class="mb-4" style="animation: popIn 0.5s ease;">
+                <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#00e5ff,#7c4dff);display:flex;align-items:center;justify-content:center;margin:0 auto;">
+                    <i class="bi bi-check-lg text-white" style="font-size:2.5rem;"></i>
+                </div>
+            </div>
+
+            <h1 class="fw-bold text-gradient mb-2">Payment Confirmed!</h1>
+            <p class="text-white-50 mb-4 fs-5">Your order has been placed and payment received successfully.</p>
+
+            @if (TempData["PaymentSuccess"] != null)
+            {
+                <div class="glass-panel p-3 mb-4 text-start">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-receipt text-gradient fs-5"></i>
+                        <strong class="text-white">Order Confirmation</strong>
+                    </div>
+                    <p class="text-white-50 mb-1 small">@TempData["PaymentSuccess"]</p>
+                    @if (TempData["PaymentIntentId"] != null)
+                    {
+                        <p class="text-white-50 mb-0 small">
+                            Payment Reference: <code class="text-info">@TempData["PaymentIntentId"]</code>
+                        </p>
+                    }
+                </div>
+            }
+
+            <div class="row g-3 mb-4 text-start">
+                <div class="col-sm-4">
+                    <div class="glass-panel p-3 text-center">
+                        <i class="bi bi-clock-history text-info d-block fs-4 mb-1"></i>
+                        <small class="text-white-50 d-block">Status</small>
+                        <strong class="text-white">Processing</strong>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="glass-panel p-3 text-center">
+                        <i class="bi bi-shield-check text-success d-block fs-4 mb-1"></i>
+                        <small class="text-white-50 d-block">Payment</small>
+                        <strong class="text-white">Paid</strong>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="glass-panel p-3 text-center">
+                        <i class="bi bi-truck text-warning d-block fs-4 mb-1"></i>
+                        <small class="text-white-50 d-block">Shipping</small>
+                        <strong class="text-white">Free</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a asp-controller="Customer" asp-action="MyOrders" class="btn btn-rainbow">
+                    <i class="bi bi-bag-check-fill me-2"></i>View My Orders
+                </a>
+                <a asp-controller="Customer" asp-action="Index" class="btn btn-glass">
+                    <i class="bi bi-grid-fill me-2"></i>Continue Shopping
+                </a>
+            </div>
+
+            <p class="text-white-50 small mt-4">
+                <i class="bi bi-envelope me-1"></i>
+                A confirmation has been logged to your order history.
+            </p>
+        </div>
     </div>
 </div>
 
-<div class="glass-panel p-4">
-    @if (!Model.Any())
-    {
-        <div class="text-center py-5">
-            <i class="bi bi-bag-x display-3 text-muted mb-3 d-block"></i>
-            <h5 class="fw-semibold text-white">No Orders Placed Yet</h5>
-            <p class="text-white-50 mb-4">You haven't placed any orders with ABC Retail. Explore our live catalog to start shopping!</p>
-            <a asp-action="Index" class="btn btn-rainbow">
-                <i class="bi bi-cart-fill me-2"></i>Browse Products
-            </a>
-        </div>
+<style>
+    @@keyframes popIn {
+        0% {
+            transform: scale(0);
+            opacity: 0;
+        }
+
+        80% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
     }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table table-custom align-middle">
-                <thead>
-                    <tr>
-                        <th style="width: 100px;">Product</th>
-                        <th>Product Name</th>
-                        <th>Ordered Date</th>
-                        <th class="text-end">Price</th>
-                        <th class="text-center" style="width: 150px;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var order in Model)
-                    {
-                        var statusBadge = order.Status == "Pending" ? "bg-warning text-dark" : "bg-success";
-                        <tr>
-                            <td>
-                                <div class="rounded border border-secondary overflow-hidden bg-dark d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                    @if (!string.IsNullOrEmpty(order.ImageUrl))
-                                    {
-                                        <img src="@order.ImageUrl" alt="@order.ProductName" style="width: 100%; height: 100%; object-fit: cover;" />
-                                    }
-                                    else
-                                    {
-                                        <i class="bi bi-box-seam text-muted fs-4"></i>
-                                    }
-                                </div>
-                            </td>
-                            <td>
-                                <strong class="text-white">@order.ProductName</strong>
-                                <span class="d-block text-white-50 small">Order ID: @order.RowKey</span>
-                            </td>
-                            <td>
-                                <span class="text-white-80">@order.OrderDate.ToString("yyyy-MM-dd HH:mm:ss")</span>
-                            </td>
-                            <td class="text-end fw-bold text-price">
-                                @order.ProductPrice.ToString("C")
-                            </td>
-                            <td class="text-center">
-                                <span class="badge @statusBadge">@order.Status</span>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
-</div>
+</style>

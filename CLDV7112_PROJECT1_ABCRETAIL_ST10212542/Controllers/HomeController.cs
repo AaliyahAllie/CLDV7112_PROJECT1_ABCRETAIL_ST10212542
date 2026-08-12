@@ -8,7 +8,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace ABCRetailWeb.Controllers
+namespace CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Controllers
 {
     public class HomeController : Controller
     {
@@ -64,7 +64,7 @@ namespace ABCRetailWeb.Controllers
             {
                 HttpContext.Session.SetString("UserRole", "Admin");
                 HttpContext.Session.SetString("UserName", "Administrator");
-                await _fileShareService.AppendLogAsync("INFO", "Admin user logged in successfully.");
+                await _fileShareService.AppendCustomerLogAsync("INFO", "Admin user logged in successfully.");
                 return RedirectToAction("Index", "Admin");
             }
 
@@ -78,12 +78,12 @@ namespace ABCRetailWeb.Controllers
                 HttpContext.Session.SetString("UserEmail", customer.Email);
                 HttpContext.Session.SetString("UserName", $"{customer.FirstName} {customer.LastName}");
                 HttpContext.Session.SetString("UserId", customer.RowKey);
-                await _fileShareService.AppendLogAsync("INFO", $"Customer {customer.Email} logged in successfully.");
+                await _fileShareService.AppendCustomerLogAsync("INFO", $"Customer {customer.Email} logged in successfully.");
                 return RedirectToAction("Index", "Customer");
             }
 
             ModelState.AddModelError("", "Invalid credentials.");
-            await _fileShareService.AppendLogAsync("WARNING", $"Failed login attempt for user: {usernameOrEmail}");
+            await _fileShareService.AppendErrorLogAsync("WARNING", $"Failed login attempt for user: {usernameOrEmail}");
             return View();
         }
 
@@ -126,7 +126,7 @@ namespace ABCRetailWeb.Controllers
             if (ModelState.IsValid)
             {
                 await _tableStorageService.UpsertCustomerAsync(customer);
-                await _fileShareService.AppendLogAsync("INFO", $"New customer registered: {customer.Email} ({customer.FirstName} {customer.LastName})");
+                await _fileShareService.AppendCustomerLogAsync("INFO", $"New customer registered: {customer.Email} ({customer.FirstName} {customer.LastName})");
 
                 // Automatically log in the user
                 HttpContext.Session.SetString("UserRole", "Customer");
@@ -143,7 +143,7 @@ namespace ABCRetailWeb.Controllers
         public async Task<IActionResult> Logout()
         {
             var user = HttpContext.Session.GetString("UserEmail") ?? HttpContext.Session.GetString("UserRole") ?? "Guest";
-            await _fileShareService.AppendLogAsync("INFO", $"User {user} logged out.");
+            await _fileShareService.AppendSystemLogAsync("INFO", $"User '{user}' logged out.");
             HttpContext.Session.Clear();
             return RedirectToAction("Index");
         }

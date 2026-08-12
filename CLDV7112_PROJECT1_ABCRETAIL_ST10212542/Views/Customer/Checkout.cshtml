@@ -1,0 +1,147 @@
+﻿@model IEnumerable<CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.CartItem>
+@{
+    ViewData["Title"] = "Checkout";
+    var total = Model.Sum(x => x.LineTotal);
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-6 fw-bold"><span class="text-gradient">💳 Secure Checkout</span></h1>
+        <p class="text-white-50">Complete your purchase below. Payments are processed securely via Stripe.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Payment Form -->
+    <div class="col-lg-7">
+        <div class="glass-panel p-4">
+            <h5 class="fw-bold text-white mb-4">
+                <i class="bi bi-credit-card me-2 text-gradient"></i>Payment Details
+            </h5>
+
+            <form id="payment-form" asp-action="ConfirmPayment" method="post">
+                <input type="hidden" id="payment-intent-id" name="paymentIntentId" />
+
+                <!-- Stripe Card Element -->
+                <div class="mb-4">
+                    <label class="label-custom mb-2">Card Information</label>
+                    <div id="card-element"
+                         class="form-glass p-3"
+                         style="border-radius:10px; min-height:48px;">
+                    </div>
+                    <div id="card-errors" class="text-danger small mt-2" role="alert"></div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 mb-4 p-3 bg-dark rounded border border-secondary">
+                    <i class="bi bi-shield-lock-fill text-success fs-5"></i>
+                    <small class="text-white-50">
+                        Your payment is encrypted and processed securely by <strong class="text-white">Stripe</strong>.
+                        We never store your card details.
+                    </small>
+                </div>
+
+                <button id="pay-btn" type="submit" class="btn btn-rainbow w-100 py-3 fs-5">
+                    <i class="bi bi-lock-fill me-2"></i>Pay R@total.ToString("F2") Now
+                </button>
+            </form>
+
+            <div class="text-center mt-3">
+                <small class="text-white-50">
+                    Test card: <code class="text-info">4242 4242 4242 4242</code> · Any future date · Any CVC
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="col-lg-5">
+        <div class="glass-panel p-4">
+            <h5 class="fw-bold text-white mb-4">Order Summary</h5>
+            @foreach (var item in Model)
+            {
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="@item.ImageUrl" alt="@item.ProductName"
+                             style="width:48px;height:48px;object-fit:cover;border-radius:8px;" />
+                    }
+                    else
+                    {
+                        <div class="bg-dark border border-secondary rounded d-flex align-items-center justify-content-center"
+                             style="width:48px;height:48px;">
+                            <i class="bi bi-box-seam text-muted"></i>
+                        </div>
+                    }
+                    <div class="flex-grow-1">
+                        <strong class="text-white d-block">@item.ProductName</strong>
+                        <small class="text-white-50">Qty: @item.Quantity × R@item.Price.ToString("F2")</small>
+                    </div>
+                    <span class="fw-bold text-price">R@item.LineTotal.ToString("F2")</span>
+                </div>
+            }
+            <hr class="border-secondary" />
+            <div class="d-flex justify-content-between text-white-50 mb-2">
+                <span>Subtotal</span><span>R@total.ToString("F2")</span>
+            </div>
+            <div class="d-flex justify-content-between text-white-50 mb-3">
+                <span>Shipping</span><span class="text-success">Free</span>
+            </div>
+            <div class="d-flex justify-content-between fw-bold text-white fs-5">
+                <span>Total Due</span>
+                <span class="text-price">R@total.ToString("F2")</span>
+            </div>
+        </div>
+
+        <div class="glass-panel p-3 mt-3">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-stripe text-info fs-4"></i>
+                <div>
+                    <small class="text-white d-block fw-semibold">Powered by Stripe</small>
+                    <small class="text-white-50">PCI-DSS Compliant · 256-bit SSL Encryption</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        const stripe = Stripe('@ViewBag.PublishableKey');
+        const elements = stripe.elements();
+        const cardElement = elements.create('card', {
+            style: {
+                base: {
+                    color: '#ffffff',
+                    fontFamily: '"Inter", sans-serif',
+                    fontSize: '16px',
+                    '::placeholder': { color: '#6c757d' }
+                },
+                invalid: { color: '#ff5252', iconColor: '#ff5252' }
+            }
+        });
+        cardElement.mount('#card-element');
+
+        const form = document.getElementById('payment-form');
+        const payBtn = document.getElementById('pay-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            payBtn.disabled = true;
+            payBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing Payment...';
+
+            const { paymentIntent, error } = await stripe.confirmCardPayment('@ViewBag.ClientSecret', {
+                payment_method: { card: cardElement }
+            });
+
+            if (error) {
+                document.getElementById('card-errors').textContent = error.message;
+                payBtn.disabled = false;
+                payBtn.innerHTML = '<i class="bi bi-lock-fill me-2"></i>Pay R@total.ToString("F2") Now';
+            } else if (paymentIntent.status === 'succeeded') {
+                document.getElementById('payment-intent-id').value = paymentIntent.id;
+                form.submit();
+            }
+        });
+    </script>
+}

@@ -1,21 +1,35 @@
-@model IEnumerable<CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.Product>
+﻿@model IEnumerable<CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models.Product>
 @{
-    ViewData["Title"] = "Shop Catalog";
+    ViewData["Title"] = "Shop Products";
 }
 
-<div class="row mb-4">
-    <div class="col-md-8">
-        <h1 class="display-6 fw-bold mb-1"><span class="text-gradient">Product Catalog</span></h1>
-        <p class="text-white-50">Browse our seasonal inventory and place your order asynchronously using Azure Storage Queues.</p>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger border-0 glass-panel mb-4">⚠️ @TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success border-0 glass-panel mb-4">✅ @TempData["Success"]</div>
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h1 class="display-6 fw-bold"><span class="text-gradient">🛍️ Shop Products</span></h1>
+        <p class="text-white-50">Browse our catalogue and add items to your cart.</p>
+    </div>
+    <div class="col-auto">
+        <a asp-controller="Cart" asp-action="Index" class="btn btn-glass position-relative">
+            <i class="bi bi-cart3 me-1"></i>View Cart
+        </a>
     </div>
 </div>
 
 @if (!Model.Any())
 {
-    <div class="glass-panel p-5 text-center mt-4">
-        <i class="bi bi-box-seam display-3 text-muted mb-3"></i>
-        <h4 class="fw-semibold text-white">No Products Available</h4>
-        <p class="text-white-50 mb-0">Our inventory is currently empty. Ask the Administrator to log in and upload products with images!</p>
+    <div class="glass-panel p-5 text-center">
+        <i class="bi bi-box-seam display-3 text-muted d-block mb-3"></i>
+        <h5 class="fw-semibold text-white">No products available</h5>
+        <p class="text-white-50">The admin hasn't uploaded any products yet. Check back soon!</p>
     </div>
 }
 else
@@ -23,6 +37,9 @@ else
     <div class="row g-4">
         @foreach (var product in Model)
         {
+            var inStock = product.StockQuantity > 0;
+            var lowStock = product.StockQuantity > 0 && product.StockQuantity <= 5;
+
             <div class="col-md-6 col-lg-4">
                 <div class="glass-panel product-card glass-panel-hover">
                     <div class="product-img-wrapper">
@@ -38,14 +55,49 @@ else
                         }
                         <span class="product-category-badge">@product.Category</span>
                     </div>
+
                     <div class="product-info">
                         <div>
-                            <h4 class="fw-bold mb-2">@product.Name</h4>
-                            <h3 class="fw-bold text-price mb-3">@product.Price.ToString("C")</h3>
+                            <h4 class="fw-bold mb-1 text-white">@product.Name</h4>
+                            @if (!string.IsNullOrEmpty(product.Description))
+                            {
+                                <p class="text-white-50 small mb-2">@product.Description</p>
+                            }
+                            <h3 class="fw-bold text-price mb-2">R@product.Price.ToString("F2")</h3>
+
+                            @if (!inStock)
+                            {
+                                <span class="badge bg-danger mb-2">Out of Stock</span>
+                            }
+                            else if (lowStock)
+                            {
+                                <span class="badge bg-warning text-dark mb-2">Only @product.StockQuantity left!</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success mb-2">In Stock (@product.StockQuantity)</span>
+                            }
                         </div>
-                        <a asp-controller="Customer" asp-action="Order" asp-route-productId="@product.RowKey" class="btn btn-rainbow w-100 mt-2">
-                            <i class="bi bi-cart-plus-fill me-2"></i>Order Now
-                        </a>
+
+                        @if (inStock)
+                        {
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post" class="mt-2">
+                                <input type="hidden" name="productId" value="@product.RowKey" />
+                                <div class="d-flex gap-2">
+                                    <input type="number" name="quantity" value="1" min="1" max="@product.StockQuantity"
+                                           class="form-control form-glass text-center" style="width:70px;" />
+                                    <button type="submit" class="btn btn-rainbow flex-grow-1">
+                                        <i class="bi bi-cart-plus-fill me-1"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-secondary w-100 mt-2" disabled>
+                                <i class="bi bi-x-circle me-1"></i>Out of Stock
+                            </button>
+                        }
                     </div>
                 </div>
             </div>

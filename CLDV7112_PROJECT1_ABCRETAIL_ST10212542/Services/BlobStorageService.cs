@@ -14,7 +14,7 @@ namespace CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Services
         {
             _blobServiceClient = new BlobServiceClient(connectionString);
             _containerClient = _blobServiceClient.GetBlobContainerClient("product-images");
-            
+
             // Create container and set access level to public so images can be displayed
             _containerClient.CreateIfNotExists(PublicAccessType.Blob);
         }

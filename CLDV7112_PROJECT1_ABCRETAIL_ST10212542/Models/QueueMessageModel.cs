@@ -1,6 +1,6 @@
 using System;
 
-namespace CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models
+namespace  CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models
 {
     public class QueueMessageModel
     {

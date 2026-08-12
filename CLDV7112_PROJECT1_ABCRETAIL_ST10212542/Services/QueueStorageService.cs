@@ -1,9 +1,10 @@
+
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
 using CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
 
 namespace CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Services
 {
@@ -29,7 +30,7 @@ namespace CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Services
         public async Task<List<QueueMessageModel>> GetMessagesAsync(int maxMessages = 20)
         {
             var result = new List<QueueMessageModel>();
-            
+
             // PeekMessages doesn't change visibility, which is ideal for a read-only list on a dashboard
             var response = await _queueClient.PeekMessagesAsync(maxMessages);
 
