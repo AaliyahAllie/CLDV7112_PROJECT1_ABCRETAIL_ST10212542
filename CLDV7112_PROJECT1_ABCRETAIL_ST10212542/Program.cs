@@ -14,6 +14,16 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // Only send cookie over HTTPS
+    options.Cookie.SameSite = SameSiteMode.Strict;            // Prevent cross-site cookie leaking
+});
+
+// Configure HSTS (HTTP Strict Transport Security) to force HTTPS for 1 year
+builder.Services.AddHsts(options =>
+{
+    options.MaxAge = TimeSpan.FromDays(365);
+    options.IncludeSubDomains = true;
+    options.Preload = false; // Set to true only if you intend to submit to the HSTS preload list
 });
 
 // Configure Azure Storage Services
@@ -34,10 +44,20 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    app.UseHsts(); // Sends Strict-Transport-Security header to browsers
 }
 
-app.UseHttpsRedirection();
+app.UseHttpsRedirection(); // Redirect all HTTP requests to HTTPS
+
+// Add security headers to every response to prevent browser warnings
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");       // Prevent MIME sniffing
+    context.Response.Headers.Append("X-Frame-Options", "SAMEORIGIN");           // Prevent clickjacking
+    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");      // Enable XSS filter
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    await next();
+});
 app.UseRouting();
 
 // Enable session state before Authorization
