@@ -75,7 +75,7 @@
                                 <small class="text-white-50">@(order.CustomerEmail ?? "—")</small>
                             </td>
                             <td class="text-center text-white">@order.Quantity</td>
-                            <td class="text-end fw-bold text-price">R@order.TotalAmount.ToString("F2")</td>
+                            <td class="text-end fw-bold text-price">R@(order.TotalAmount.ToString("F2"))</td>
                             <td><small class="text-white-50">@order.OrderDate.ToString("yyyy-MM-dd HH:mm")</small></td>
                             <td class="text-center"><span class="badge @payBadge">@order.PaymentStatus</span></td>
                             <td class="text-center">

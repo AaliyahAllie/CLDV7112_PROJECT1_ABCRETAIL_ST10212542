@@ -64,7 +64,11 @@ namespace CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Services
         {
             var products = new List<Product>();
             await foreach (var p in _productTableClient.QueryAsync<Product>())
+            {
+                // Default uninitialized stock quantities to 50 so existing items show in stock
+                if (p.StockQuantity <= 0) p.StockQuantity = 50;
                 products.Add(p);
+            }
             return products;
         }
 
@@ -73,7 +77,9 @@ namespace CLDV7112_PROJECT1_ABCRETAIL_ST10212542.Services
             try
             {
                 var response = await _productTableClient.GetEntityAsync<Product>(partitionKey, rowKey);
-                return response.Value;
+                var p = response.Value;
+                if (p != null && p.StockQuantity <= 0) p.StockQuantity = 50;
+                return p;
             }
             catch { return null; }
         }

@@ -132,7 +132,7 @@
                     <div class="product-info">
                         <div>
                             <h4 class="fw-bold mb-1 text-white">@product.Name</h4>
-                            <h3 class="fw-bold text-price mb-3">@product.Price.ToString("C")</h3>
+                            <h3 class="fw-bold text-price mb-3">R@(product.Price.ToString("F2"))</h3>
                         </div>
 
                         @if (string.IsNullOrEmpty(userRole))
@@ -143,8 +143,8 @@
                         }
                         else if (userRole == "Customer")
                         {
-                            <a asp-controller="Customer" asp-action="Order" asp-route-productId="@product.RowKey" class="btn btn-rainbow w-100 mt-2">
-                                <i class="bi bi-cart-plus-fill me-2"></i>Order Now
+                            <a asp-controller="Customer" asp-action="Index" class="btn btn-rainbow w-100 mt-2">
+                                <i class="bi bi-cart-plus-fill me-2"></i>Go to Shop & Buy
                             </a>
                         }
                         else

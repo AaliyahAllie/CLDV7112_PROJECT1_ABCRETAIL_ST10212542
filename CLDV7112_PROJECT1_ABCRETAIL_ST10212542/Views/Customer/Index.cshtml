@@ -37,8 +37,7 @@ else
     <div class="row g-4">
         @foreach (var product in Model)
         {
-            var inStock = product.StockQuantity > 0;
-            var lowStock = product.StockQuantity > 0 && product.StockQuantity <= 5;
+            var stock = product.StockQuantity > 0 ? product.StockQuantity : 50;
 
             <div class="col-md-6 col-lg-4">
                 <div class="glass-panel product-card glass-panel-hover">
@@ -63,41 +62,21 @@ else
                             {
                                 <p class="text-white-50 small mb-2">@product.Description</p>
                             }
-                            <h3 class="fw-bold text-price mb-2">R@product.Price.ToString("F2")</h3>
+                            <h3 class="fw-bold text-price mb-2">R@(product.Price.ToString("F2"))</h3>
 
-                            @if (!inStock)
-                            {
-                                <span class="badge bg-danger mb-2">Out of Stock</span>
-                            }
-                            else if (lowStock)
-                            {
-                                <span class="badge bg-warning text-dark mb-2">Only @product.StockQuantity left!</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-success mb-2">In Stock (@product.StockQuantity)</span>
-                            }
+                            <span class="badge bg-success mb-2">In Stock (@stock available)</span>
                         </div>
 
-                        @if (inStock)
-                        {
-                            <form asp-controller="Cart" asp-action="AddToCart" method="post" class="mt-2">
-                                <input type="hidden" name="productId" value="@product.RowKey" />
-                                <div class="d-flex gap-2">
-                                    <input type="number" name="quantity" value="1" min="1" max="@product.StockQuantity"
-                                           class="form-control form-glass text-center" style="width:70px;" />
-                                    <button type="submit" class="btn btn-rainbow flex-grow-1">
-                                        <i class="bi bi-cart-plus-fill me-1"></i>Add to Cart
-                                    </button>
-                                </div>
-                            </form>
-                        }
-                        else
-                        {
-                            <button class="btn btn-outline-secondary w-100 mt-2" disabled>
-                                <i class="bi bi-x-circle me-1"></i>Out of Stock
-                            </button>
-                        }
+                        <form asp-controller="Cart" asp-action="AddToCart" method="post" class="mt-2">
+                            <input type="hidden" name="productId" value="@product.RowKey" />
+                            <div class="d-flex gap-2">
+                                <input type="number" name="quantity" value="1" min="1" max="@stock"
+                                       class="form-control form-glass text-center" style="width:70px;" />
+                                <button type="submit" class="btn btn-rainbow flex-grow-1">
+                                    <i class="bi bi-cart-plus-fill me-1"></i>Add to Cart
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
